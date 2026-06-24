@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #f6f4ee;
+  color: #2e3a33;
+  font-family: var(--font-figtree), system-ui, -apple-system, sans-serif;
+}
+
+.font-serif-grove {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+
+/* Rendered Markdown inside the coach's bubbles */
+.md > * + * {
+  margin-top: 0.5rem;
+}
+.md strong {
+  font-weight: 700;
+  color: #243029;
+}
+.md em {
+  font-style: italic;
+}
+.md ul {
+  list-style: disc;
+  padding-left: 1.2rem;
+}
+.md ol {
+  list-style: decimal;
+  padding-left: 1.2rem;
+}
+.md li {
+  margin-top: 0.2rem;
+}
+.md a {
+  color: #46604f;
+  text-decoration: underline;
+}
+.md h1,
+.md h2,
+.md h3 {
+  font-weight: 700;
+}
+.md code {
+  background: #dfe7df;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.3rem;
+  font-size: 0.9em;
+}
+
+/* Typing indicator */
+@keyframes groveBounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+.grove-dot {
+  animation: groveBounce 1.2s infinite ease-in-out;
+}
+.grove-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.grove-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Owl mascot animations */
+.owl-float {
+  animation: groveFloat 3s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes groveFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.owl-pulse {
+  animation: grovePulse 0.9s ease-in-out infinite;
+}
+@keyframes grovePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
