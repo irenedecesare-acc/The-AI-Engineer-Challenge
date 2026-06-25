@@ -480,3 +480,62 @@ Who else is diving into the world of AI? Let's connect! 🌐💡
 
 #FirstLLMApp 
 ```
+
+---
+
+# 🌳 Grove — Deployment Status & Notes (updated 2026-06-25)
+
+> Personal working notes for the deployed app. **No secrets live in this file or in git** — the API key exists only as a Vercel environment variable, added manually in the dashboard.
+
+## ✅ Current status: LIVE and working end-to-end
+
+**Open the app:** https://grove-coach.vercel.app (also reachable at https://grove-coach-no-team-4-me.vercel.app)
+
+- Verified: frontend serves HTTP 200 (`<title>Grove — your coach</title>`), the browser POSTs cross-origin to `grove-coach-api.vercel.app/api/chat`, the CORS preflight passes, and `/api/chat` returns a real coach reply through the APIM gateway.
+
+## 🏛️ Architecture (two Vercel projects, scope `no-team-4-me`)
+
+| Project | Role | URL | Notes |
+|---|---|---|---|
+| `grove-coach` | Next.js frontend | https://grove-coach-no-team-4-me.vercel.app | Calls the API directly (cross-origin) |
+| `grove-coach-api` | FastAPI backend | https://grove-coach-api.vercel.app | `/` → `{"status":"ok"}`, `/api/chat` → Claude |
+
+The browser calls the API **directly** (not via a Next.js proxy). CORS is open on the backend (`allow_origins=["*"]`). Deployment Protection (Vercel Authentication) is **OFF** on both projects.
+
+## 🔑 Environment variables (set in Vercel dashboard, Production)
+
+**`grove-coach-api`** (the backend — this is where the key lives):
+- `ANTHROPIC_API_KEY` = the cohort APIM subscription key (32-char). **Added manually in the dashboard — never commit it.** This is the only required secret.
+- `ANTHROPIC_BASE_URL` = `https://lgts1tetamapi01.azure-api.net/claude/anthropic` — **optional**. The same value is the hardcoded default in `api/index.py`, so the backend works even if this var is absent; set it only to point at a different endpoint.
+
+**`grove-coach`** (the frontend):
+- No env var required. `app/page.tsx` falls back to `https://grove-coach-api.vercel.app` in production, so `NEXT_PUBLIC_BACKEND_URL` is optional (set it only to override the backend URL).
+
+## 🔁 How to redeploy
+
+The Vercel CLI uploads **local working files** directly — no `git push` required to deploy.
+
+```bash
+# Frontend (run from the frontend/ folder, linked to grove-coach)
+cd frontend
+vercel --prod --yes
+
+# Backend (run from the repo root, linked to grove-coach-api)
+cd ..
+vercel --prod --yes
+```
+
+> After changing an env var in the dashboard, you must redeploy that project for it to take effect.
+
+## 💻 Local development
+
+```bash
+# Backend (repo root) — needs a local .env with ANTHROPIC_API_KEY and ANTHROPIC_BASE_URL
+uv run uvicorn api.index:app --reload --port 8000
+
+# Frontend (separate terminal)
+cd frontend
+node node_modules/next/dist/bin/next dev   # bypasses the pnpm build-script gate
+```
+
+In dev, `NEXT_PUBLIC_BACKEND_URL` is unset, so the browser calls a relative `/api/chat` and `next.config.ts` proxies it to `http://127.0.0.1:8000` (the proxy is **dev-only**).

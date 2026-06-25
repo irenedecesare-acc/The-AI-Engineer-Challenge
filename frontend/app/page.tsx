@@ -6,6 +6,17 @@ import Owl, { type OwlState } from "./components/Owl";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
+// In production the browser calls the API project directly (cross-origin);
+// CORS is open on the backend. We fall back to the known backend URL (not a
+// secret) so a missing/unbaked NEXT_PUBLIC_BACKEND_URL can't make the client
+// POST to its own /api/chat (which 404s). In dev this stays empty, so the fetch
+// is relative ("/api/chat") and next.config proxies it to localhost:8000.
+const API_BASE =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://grove-coach-api.vercel.app"
+    : "");
+
 const SUGGESTIONS = [
   "I'm feeling anxious",
   "Help me focus",
@@ -45,7 +56,7 @@ export default function Home() {
     setOwlState("thinking");
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: next }),
